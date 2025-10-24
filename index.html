@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geometric Series - Problem 5</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true,
+                processEnvironments: true
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Latin+Modern+Math&family=CMU+Serif:ital,wght@0,400;0,700;1,400&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #0a0a1a;
+            color: #ffffff;
+            font-family: 'CMU Serif', 'Latin Modern Math', serif;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .scene {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 5px;
+        }
+        
+        .math-container {
+            text-align: center;
+            max-width: 800px;
+            width: 99%;
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .title {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #4fc3f7;
+            margin-bottom: 4px;
+            text-align: center;
+            font-family: 'Latin Modern Math', 'CMU Serif', serif;
+            flex-shrink: 0;
+            max-width: 100%;
+            word-wrap: break-word;
+            padding: 0 2px;
+        }
+        
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            overflow-y: auto;
+            width: 100%;
+            max-height: 75vh;
+            padding: 5px 0;
+        }
+        
+        .math-line {
+            font-size: 0.95em;
+            margin: 2px 0;
+            color: #e3f2fd;
+            text-align: center;
+            line-height: 1.3;
+            opacity: 0;
+            transform: translateY(20px);
+            max-width: 99%;
+            word-wrap: break-word;
+            padding: 0 2px;
+        }
+        
+        .compact-line {
+            font-size: 0.9em;
+            margin: 1px 0;
+            line-height: 1.2;
+            opacity: 0;
+            transform: translateY(20px);
+            max-width: 99%;
+        }
+        
+        .fade-in {
+            animation: fadeInUp 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .final-box {
+            border: 2px solid #4fc3f7;
+            padding: 6px 10px;
+            border-radius: 4px;
+            margin: 4px 0;
+            background: rgba(79, 195, 247, 0.1);
+            box-shadow: 0 0 8px rgba(79, 195, 247, 0.25);
+            font-size: 1.0em;
+            font-weight: bold;
+            flex-shrink: 0;
+            opacity: 0;
+            transform: translateY(20px);
+            max-width: 95%;
+            line-height: 1.3;
+        }
+        
+        .slide-counter {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            color: #666;
+            font-size: 0.6em;
+            font-family: 'CMU Serif', serif;
+        }
+        
+        .controls {
+            position: absolute;
+            bottom: 4px;
+            left: 4px;
+            display: flex;
+            gap: 4px;
+        }
+        
+        .control-btn {
+            background: rgba(79, 195, 247, 0.2);
+            border: 1px solid #4fc3f7;
+            color: #4fc3f7;
+            padding: 3px 6px;
+            border-radius: 2px;
+            cursor: pointer;
+            font-family: 'CMU Serif', serif;
+            font-size: 0.6em;
+            transition: all 0.3s ease;
+        }
+        
+        .control-btn:hover {
+            background: rgba(79, 195, 247, 0.3);
+            transform: translateY(-1px);
+        }
+        
+        .control-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .control-btn:disabled:hover {
+            background: rgba(79, 195, 247, 0.2);
+            transform: none;
+        }
+        
+        .paused {
+            background: rgba(255, 87, 87, 0.2);
+            border-color: #ff5757;
+            color: #ff5757;
+        }
+        
+        .spacer {
+            height: 1px;
+            flex-shrink: 0;
+        }
+        
+        .tiny-spacer {
+            height: 0.5px;
+            flex-shrink: 0;
+        }
+        
+        .highlight {
+            color: #ffeb3b;
+            font-weight: bold;
+        }
+        
+        .step-number {
+            color: #4fc3f7;
+            font-weight: bold;
+        }
+        
+        .limit-expression {
+            font-size: 0.95em;
+            color: #ff9800;
+            margin: 3px 0;
+            font-weight: bold;
+            font-family: 'Latin Modern Math', serif;
+            max-width: 99%;
+            line-height: 1.3;
+        }
+        
+        .technique {
+            color: #4caf50;
+            font-style: italic;
+            font-size: 0.8em;
+            margin: 1px 0;
+            max-width: 99%;
+            line-height: 1.2;
+        }
+        
+        /* Hide scrollbar but allow scrolling */
+        .content-area::-webkit-scrollbar {
+            display: none;
+        }
+        .content-area {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="scene">
+        <div class="math-container">
+            <div class="title" id="slideTitle">Geometric Series - Problem 5</div>
+            <div class="content-area" id="contentArea">
+                <div class="math-line">Problem 5: Geometric Series</div>
+                <div class="spacer"></div>
+                <div class="limit-expression">$$\sum_{n=0}^{50} \left( \frac{2}{5} \right)^n$$</div>
+                <div class="limit-expression">$$\sum_{n=0}^{20000} \left( \frac{2}{5} \right)^n$$</div>
+                <div class="limit-expression">Partial sum formula and infinite series</div>
+            </div>
+        </div>
+        <div class="controls">
+            <button class="control-btn" id="pauseBtn">Pause</button>
+            <button class="control-btn" id="prevBtn" disabled>Previous</button>
+            <button class="control-btn" id="nextBtn">Next</button>
+        </div>
+        <div class="slide-counter" id="counter">1/8</div>
+    </div>
+
+    <script>
+        const slides = [
+            {
+                title: "Problem 5: Geometric Series",
+                content: [
+                    "<span class='step-number'>Problem 5a-d:</span>",
+                    "$$\\sum_{n=0}^{50} \\left( \\frac{2}{5} \\right)^n$$",
+                    "$$\\sum_{n=0}^{20000} \\left( \\frac{2}{5} \\right)^n$$",
+                    "Partial sum formula",
+                    "Infinite series evaluation",
+                    "<span class='technique'>We'll use the geometric series formula</span>"
+                ],
+                baseTime: 6000
+            },
+            {
+                title: "General Geometric Series Formula",
+                content: [
+                    "<span class='step-number'>Step 1: General Formula Derivation</span>",
+                    "Let $S_M = \\sum_{n=0}^{M} r^n = 1 + r + r^2 + \\dots + r^M$",
+                    "Multiply both sides by $r$:",
+                    "$r S_M = r + r^2 + r^3 + \\dots + r^{M+1}$",
+                    "Subtract the two equations:",
+                    "$S_M - r S_M = (1 + r + r^2 + \\dots + r^M) - (r + r^2 + \\dots + r^{M+1})$"
+                ],
+                baseTime: 8000
+            },
+            {
+                title: "Telescoping Cancellation",
+                content: [
+                    "<span class='step-number'>Step 2: Telescoping Series</span>",
+                    "$S_M - r S_M = 1 + \\cancel{r} + \\cancel{r^2} + \\dots + \\cancel{r^M}$",
+                    "$\\quad - \\cancel{r} - \\cancel{r^2} - \\dots - \\cancel{r^M} - r^{M+1}$",
+                    "Everything cancels except:",
+                    "$S_M - r S_M = 1 - r^{M+1}$",
+                    "Factor: $S_M(1 - r) = 1 - r^{M+1}$",
+                    "Therefore: $S_M = \\frac{1 - r^{M+1}}{1 - r}$"
+                ],
+                baseTime: 8000
+            },
+            {
+                title: "Problem 5a: Sum from n=0 to 50",
+                content: [
+                    "<span class='step-number'>Problem 5a Solution</span>",
+                    "$$\\sum_{n=0}^{50} \\left( \\frac{2}{5} \\right)^n$$",
+                    "Here: $r = \\frac{2}{5}$, $M = 50$, number of terms = $M+1 = 51$",
+                    "Apply the formula:",
+                    "$S_{50} = \\frac{1 - \\left( \\frac{2}{5} \\right)^{51}}{1 - \\frac{2}{5}}$",
+                    "$S_{50} = \\frac{1 - \\left( \\frac{2}{5} \\right)^{51}}{\\frac{3}{5}}$",
+                    "<div class='final-box'>$$S_{50} = \\frac{5}{3} \\left[ 1 - \\left( \\frac{2}{5} \\right)^{51} \\right]$$</div>"
+                ],
+                baseTime: 8000
+            },
+            {
+                title: "Problem 5b: Sum from n=0 to 20,000",
+                content: [
+                    "<span class='step-number'>Problem 5b Solution</span>",
+                    "$$\\sum_{n=0}^{20000} \\left( \\frac{2}{5} \\right)^n$$",
+                    "Same formula: $r = \\frac{2}{5}$, $M = 20000$",
+                    "$S_{20000} = \\frac{1 - \\left( \\frac{2}{5} \\right)^{20001}}{1 - \\frac{2}{5}}$",
+                    "$S_{20000} = \\frac{1 - \\left( \\frac{2}{5} \\right)^{20001}}{\\frac{3}{5}}$",
+                    "<div class='final-box'>$$S_{20000} = \\frac{5}{3} \\left[ 1 - \\left( \\frac{2}{5} \\right)^{20001} \\right]$$</div>"
+                ],
+                baseTime: 7000
+            },
+            {
+                title: "Problem 5c: Partial Sum Formula",
+                content: [
+                    "<span class='step-number'>Problem 5c: General Partial Sum</span>",
+                    "For $\\sum_{n=0}^{M} \\left( \\frac{2}{5} \\right)^n$",
+                    "Using our general formula with $r = \\frac{2}{5}$:",
+                    "$S_M = \\frac{1 - \\left( \\frac{2}{5} \\right)^{M+1}}{1 - \\frac{2}{5}}$",
+                    "$S_M = \\frac{1 - \\left( \\frac{2}{5} \\right)^{M+1}}{\\frac{3}{5}}$",
+                    "<div class='final-box'>$$S_M = \\frac{5}{3} \\left[ 1 - \\left( \\frac{2}{5} \\right)^{M+1} \\right]$$</div>"
+                ],
+                baseTime: 7000
+            },
+            {
+                title: "Problem 5d: Infinite Series",
+                content: [
+                    "<span class='step-number'>Problem 5d: Infinite Geometric Series</span>",
+                    "$$\\sum_{n=0}^{\\infty} \\left( \\frac{2}{5} \\right)^n$$",
+                    "Since $|r| = \\frac{2}{5} < 1$, the series converges",
+                    "As $M \\to \\infty$, $\\left( \\frac{2}{5} \\right)^{M+1} \\to 0$",
+                    "So: $\\lim_{M\\to\\infty} S_M = \\frac{1}{1 - \\frac{2}{5}}$",
+                    "$\\lim_{M\\to\\infty} S_M = \\frac{1}{\\frac{3}{5}}$",
+                    "<div class='final-box'>$$\\sum_{n=0}^{\\infty} \\left( \\frac{2}{5} \\right)^n = \\frac{5}{3}$$</div>"
+                ],
+                baseTime: 8000
+            },
+            {
+                title: "Complete Solution Summary",
+                content: [
+                    "<span class='step-number'>🎉 Problem 5 Complete! 🎉</span>",
+                    "<div style='font-size: 1.1em; color: #ffeb3b; margin: 10px 0;'>Summary of Answers:</div>",
+                    "<span class='technique'>5a:</span> $\\frac{5}{3} \\left[ 1 - \\left( \\frac{2}{5} \\right)^{51} \\right]$",
+                    "<span class='technique'>5b:</span> $\\frac{5}{3} \\left[ 1 - \\left( \\frac{2}{5} \\right)^{20001} \\right]$",
+                    "<span class='technique'>5c:</span> $\\frac{5}{3} \\left[ 1 - \\left( \\frac{2}{5} \\right)^{M+1} \\right]$",
+                    "<span class='technique'>5d:</span> $\\frac{5}{3}$",
+                    "<div style='font-size: 1.2em; color: #4fc3f7; margin: 15px 0;'>✓ Geometric Series Mastered! ✓</div>",
+                    "<span class='technique'>Perfect template applied to geometric series problems!</span>"
+                ],
+                baseTime: 10000
+            }
+        ];
+
+        let currentSlide = 0;
+        let slideTimeout;
+        let isPaused = false;
+
+        function showSlide(slideIndex) {
+            const slide = slides[slideIndex];
+            const titleElement = document.getElementById('slideTitle');
+            const contentArea = document.getElementById('contentArea');
+            const counter = document.getElementById('counter');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            // Clear any existing timeout
+            clearTimeout(slideTimeout);
+            
+            // Update title
+            titleElement.textContent = slide.title;
+            
+            // Build content
+            let contentHTML = '';
+            slide.content.forEach(line => {
+                if (line.includes('final-box')) {
+                    contentHTML += `<div class="math-content">${line}</div>`;
+                } else {
+                    contentHTML += `<div class="math-line">${line}</div>`;
+                }
+                if (!line.includes('final-box')) {
+                    contentHTML += `<div class="tiny-spacer"></div>`;
+                }
+            });
+            
+            contentArea.innerHTML = contentHTML;
+            counter.textContent = `${slideIndex + 1}/${slides.length}`;
+            
+            // Update button states
+            prevBtn.disabled = slideIndex === 0;
+            nextBtn.disabled = slideIndex === slides.length - 1;
+            
+            // Render MathJax
+            if (window.MathJax) {
+                window.MathJax.typesetClear();
+                window.MathJax.typesetPromise([contentArea]).catch(err => console.log('MathJax error:', err));
+            }
+            
+            // Get all elements that will animate
+            const allElements = contentArea.querySelectorAll('.math-line, .compact-line, .final-box, .math-content');
+            
+            // Calculate total time: base time for all lines + 3 seconds for final pause
+            const totalTime = slide.baseTime + 3000;
+            
+            // Set timeout for next slide
+            if (!isPaused) {
+                slideTimeout = setTimeout(nextSlide, totalTime);
+            }
+            
+            // Animate ALL elements with simple sequential timing
+            allElements.forEach((element, index) => {
+                // Start each element immediately but with increasing delay
+                setTimeout(() => {
+                    element.classList.remove('fade-in');
+                    // Force reflow
+                    void element.offsetWidth;
+                    element.classList.add('fade-in');
+                }, index * 800);
+            });
+            
+            currentSlide = slideIndex;
+        }
+
+        function nextSlide() {
+            if (currentSlide < slides.length - 1) {
+                showSlide(currentSlide + 1);
+            }
+        }
+
+        function previousSlide() {
+            if (currentSlide > 0) {
+                showSlide(currentSlide - 1);
+            }
+        }
+
+        function togglePause() {
+            const pauseBtn = document.getElementById('pauseBtn');
+            isPaused = !isPaused;
+            
+            if (isPaused) {
+                clearTimeout(slideTimeout);
+                pauseBtn.textContent = 'Resume';
+                pauseBtn.classList.add('paused');
+            } else {
+                pauseBtn.textContent = 'Pause';
+                pauseBtn.classList.remove('paused');
+                // Restart the current slide
+                showSlide(currentSlide);
+            }
+        }
+
+        // Event listeners
+        document.getElementById('pauseBtn').addEventListener('click', togglePause);
+        document.getElementById('prevBtn').addEventListener('click', previousSlide);
+        document.getElementById('nextBtn').addEventListener('click', nextSlide);
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.controls')) {
+                clearTimeout(slideTimeout);
+                nextSlide();
+            }
+        });
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === ' ' || e.key === 'ArrowRight') {
+                clearTimeout(slideTimeout);
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                clearTimeout(slideTimeout);
+                previousSlide();
+            } else if (e.key === 'p' || e.key === 'P') {
+                togglePause();
+            }
+        });
+
+        // Start with first slide
+        showSlide(0);
+    </script>
+</body>
+</html>
